@@ -103,3 +103,38 @@ i verificant cada funcionalitat abans de continuar.
   Confirmar la persistència entre execucions.
   Requisits: RF-01 a RF-22 amb les ampliacions de v2.0.
   Escenaris: GS-01 a GS-21 amb les adaptacions documentades.
+
+
+## Increment 3: Resums i filtres
+
+Objectiu: facilitar la consulta del registre sense modificar les dades.
+
+- [ ] Tasca 3.1: Implementar list --summary amb els cinc recomptes.
+  Reutilitzar les regles d’urgència i caducitat del segon increment.
+  Afegir proves amb una data de referència controlada.
+  Verificar el resum d’un registre buit.
+  Requisits: RF-23, RF-24, RF-30 i RF-31.
+  Escenaris: GS-22, GS-29 i GS-30.
+
+- [ ] Tasca 3.2: Implementar list --subject.
+  Comparar l’assignatura completa ignorant majúscules i minúscules.
+  Permetre combinar el filtre amb --summary.
+  Afegir proves amb coincidències i sense coincidències.
+  Requisits: RF-25, RF-28, RF-29, RF-30 i RF-31.
+  Escenaris: GS-23, GS-26, GS-27, GS-28 i GS-29.
+
+- [ ] Tasca 3.3: Implementar list --keyword i la combinació de filtres.
+  Cercar el text dins del títol ignorant majúscules i minúscules.
+  Aplicar tots els filtres abans de calcular el resum.
+  Afegir proves de cerca, combinació i resum amb els dos filtres.
+  Requisits: RF-26, RF-27, RF-28, RF-29, RF-30 i RF-31.
+  Escenaris: GS-24, GS-25 i GS-29.
+  Ampliar GS-26 i GS-28 amb el filtre de títol.
+
+- [ ] Tasca 3.4: Validar el tercer increment complet.
+  Executar python3 -m pytest test.
+  Comprovar manualment els nous comandaments.
+  Verificar que list sense opcions conserva el comportament anterior.
+  Comprovar que les funcionalitats dels increments anteriors funcionen.
+  Requisits: RF-01 a RF-31 amb les ampliacions vigents.
+  Escenaris: tots els escenaris aplicables de les versions 2.0 i 3.0.

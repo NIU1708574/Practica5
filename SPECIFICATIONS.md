@@ -393,3 +393,161 @@ I es conserven els altres atributs.
   i adapta el format de sortida a v2.0.
 - Les proves de RF-02 han de comprovar que l’aplicació crea
   data/tasks.json quan aquest fitxer no existeix.
+
+
+# Increment 3 — v3.0
+
+## Històries d’usuari
+
+- US-09: Com a estudiant, vull consultar un resum del nombre de tasques
+  per conèixer l’estat general de la meva feina.
+- US-10: Com a estudiant, vull llistar les tasques d’una assignatura
+  per centrar-me en la feina d’aquesta matèria.
+- US-11: Com a estudiant, vull cercar tasques mitjançant una paraula
+  del títol per trobar-les fàcilment.
+
+## Comandaments
+
+- Resum:
+  list --summary
+- Filtre per assignatura:
+  list --subject <assignatura>
+- Filtre per text del títol:
+  list --keyword <text>
+- Filtres combinats:
+  list --subject <assignatura> --keyword <text>
+- Resum filtrat:
+  list --summary --subject <assignatura> --keyword <text>
+
+## Regles del llistat
+
+- list sense opcions conserva el comportament de la versió 2.0.
+- El filtre d’assignatura compara el nom complet, ignorant majúscules
+  i minúscules.
+- El filtre del títol cerca el text indicat com a subcadena,
+  ignorant majúscules i minúscules.
+- Si es combinen filtres, una tasca ha de complir-los tots.
+- Els filtres no modifiquen les dades.
+- El resum s’aplica al conjunt seleccionat pels filtres.
+- --summary mostra únicament els recomptes.
+- Sense coincidències, el llistat mostra
+  "No s'han trobat tasques amb aquests filtres."
+- Un resum sense coincidències mostra tots els recomptes a zero.
+
+Les tasques urgents i caducades són subconjunts de les pendents.
+Per tant:
+- total = pendents + completades.
+- Les urgents i caducades no se sumen una altra vegada al total.
+- Les tasques pendents sense data compten com a pendents,
+  però no com a urgents ni caducades.
+
+## Requisits
+
+- RF-23: El sistema tasks_app ha de proveir a l’estudiant la capacitat
+  de consultar el nombre total de tasques i el nombre de tasques
+  pendents, completades, caducades i urgents mitjançant list --summary.
+
+- RF-24: El sistema tasks_app ha de calcular els recomptes de tasques
+  urgents i caducades aplicant les regles de dates de la versió 2.0.
+
+- RF-25: El sistema tasks_app ha de proveir a l’estudiant la capacitat
+  de filtrar les tasques per coincidència completa de l’assignatura,
+  ignorant majúscules i minúscules, mitjançant list --subject <assignatura>.
+
+- RF-26: El sistema tasks_app ha de proveir a l’estudiant la capacitat
+  de filtrar les tasques que contenen el text indicat en el títol,
+  ignorant majúscules i minúscules, mitjançant list --keyword <text>.
+
+- RF-27: Si s’indiquen els dos filtres, el sistema tasks_app ha de
+  seleccionar únicament les tasques que compleixen tots dos criteris.
+
+- RF-28: Si s’utilitza --summary amb filtres, el sistema tasks_app
+  ha de calcular els recomptes únicament sobre les tasques seleccionades.
+
+- RF-29: Si un llistat filtrat no té coincidències, el sistema tasks_app
+  ha de mostrar "No s'han trobat tasques amb aquests filtres.".
+
+- RF-30: Si el conjunt seleccionat per al resum és buit, el sistema
+  tasks_app ha de mostrar tots els recomptes a zero.
+
+- RF-31: El sistema tasks_app ha de conservar les dades del registre
+  sense modificacions en executar qualsevol consulta de llistat o resum.
+
+## Escenaris Gherkin
+
+### Dades comunes dels escenaris GS-22 a GS-28
+
+Atès que la data actual és 2026-11-23
+I el registre conté:
+  | id | títol              | assignatura | estat      | data_limit |
+  | 1  | Pràctica requisits | RS          | pendent    | 2026-11-22 |
+  | 2  | Examen parcial     | RS          | pendent    | 2026-11-23 |
+  | 3  | Pràctica processos | SO          | completada | 2026-11-20 |
+  | 4  | Lectura tema 4     | SO          | pendent    | 2026-12-10 |
+  | 5  | Revisió apunts     | RS          | pendent    | null       |
+
+Cada escenari parteix d’aquestes dades sense modificacions.
+
+### GS-22: Resum general
+Quan l’estudiant executa:
+  python3 src/tasks_app.py list --summary
+Aleshores el sistema mostra:
+  Total: 5
+  Pendents: 4
+  Completades: 1
+  Caducades: 1
+  Urgents: 1
+I no mostra les files individuals de les tasques.
+
+### GS-23: Filtrar per assignatura
+Quan l’estudiant executa:
+  python3 src/tasks_app.py list --subject "rs"
+Aleshores el sistema mostra únicament les tasques amb ID 1, 2 i 5
+I conserva el format i els avisos del llistat de la versió 2.0.
+
+### GS-24: Filtrar per text del títol
+Quan l’estudiant executa:
+  python3 src/tasks_app.py list --keyword "PRÀCTICA"
+Aleshores el sistema mostra únicament les tasques amb ID 1 i 3.
+
+### GS-25: Combinar filtres
+Quan l’estudiant executa:
+  python3 src/tasks_app.py list --subject "RS" --keyword "pràctica"
+Aleshores el sistema mostra únicament la tasca amb ID 1.
+
+### GS-26: Resum filtrat
+Quan l’estudiant executa:
+  python3 src/tasks_app.py list --summary --subject "RS"
+Aleshores el sistema mostra:
+  Total: 3
+  Pendents: 3
+  Completades: 0
+  Caducades: 1
+  Urgents: 1
+
+### GS-27: Filtre sense coincidències
+Quan l’estudiant executa:
+  python3 src/tasks_app.py list --subject "BD"
+Aleshores el sistema mostra
+  "No s'han trobat tasques amb aquests filtres.".
+
+### GS-28: Resum sense coincidències
+Quan l’estudiant executa:
+  python3 src/tasks_app.py list --summary --subject "BD"
+Aleshores el sistema mostra:
+  Total: 0
+  Pendents: 0
+  Completades: 0
+  Caducades: 0
+  Urgents: 0
+
+### GS-29: Consultes sense modificar les dades
+Atès que es coneix el contingut de data/tasks.json
+Quan l’estudiant executa els llistats i resums del tercer increment
+Aleshores el contingut de data/tasks.json no es modifica.
+
+### GS-30: Resum d’un registre buit
+Atès que el registre no conté tasques
+Quan l’estudiant executa:
+  python3 src/tasks_app.py list --summary
+Aleshores el sistema mostra tots els recomptes a zero.
