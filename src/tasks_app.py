@@ -161,13 +161,35 @@ def retornar_a_pendent(id_valor):
     desar_tasques(tasques)
 
 
+def avis_tasca(tasca, avui):
+    if tasca.estat != "pendent" or not tasca.data_limit:
+        return ""
+    try:
+        data_limit = date.fromisoformat(tasca.data_limit)
+    except (TypeError, ValueError):
+        return ""
+    dies = (data_limit - avui).days
+    if dies < 0:
+        return "[CADUCADA]"
+    if dies <= 6:
+        return "[URGENT]"
+    return ""
+
+
 def llistar_tasques():
     tasques = carregar_tasques()
     if not tasques:
         print("Registre de tasques buit.")
         return
+    avui = date.today()
     for tasca in tasques:
-        print(f"[{tasca.id}] {tasca.titol} ({tasca.assignatura}) - estat: {tasca.estat}")
+        data_mostrada = tasca.data_limit if tasca.data_limit else "sense data"
+        avis = avis_tasca(tasca, avui)
+        sufix = f" {avis}" if avis else ""
+        print(
+            f"[{tasca.id}] {tasca.titol} ({tasca.assignatura})"
+            f" - estat: {tasca.estat} - data límit: {data_mostrada}{sufix}"
+        )
 
 
 def main(argv=None):

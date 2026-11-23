@@ -85,7 +85,7 @@ i verificant cada funcionalitat abans de continuar.
 
 ### Llistat i validació
 
-- [ ] Tasca 2.9: Ampliar list amb la data límit i els avisos.
+- [x] Tasca 2.9: Ampliar list amb la data límit i els avisos.
   Mostrar "sense data" per a les tasques que no en tenen.
   Calcular els avisos segons la data local actual.
   Utilitzar una data controlada en les proves.
