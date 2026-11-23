@@ -95,7 +95,7 @@ i verificant cada funcionalitat abans de continuar.
   Escenaris: GS-02, GS-03 adaptat, GS-13, GS-14, GS-15
   i comprovació completa de GS-19.
 
-- [ ] Tasca 2.10: Validar el segon increment complet.
+- [x] Tasca 2.10: Validar el segon increment complet.
   Executar python3 -m pytest test.
   Verificar la creació de data/tasks.json quan no existeix.
   Comprovar manualment tots els comandaments.
