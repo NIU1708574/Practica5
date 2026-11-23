@@ -42,6 +42,17 @@ def carregar_tasques():
     return [Task.from_dict(registre) for registre in dades]
 
 
+def buscar_tasca(tasques, id_valor):
+    try:
+        identificador = int(id_valor)
+    except (TypeError, ValueError):
+        return None
+    for tasca in tasques:
+        if tasca.id == identificador:
+            return tasca
+    return None
+
+
 FORMAT_DATA = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -68,6 +79,16 @@ def afegir_tasca(titol, assignatura, data_limit):
     print(f"Tasca [ID: {tasca.id}] creada amb èxit")
 
 
+def modificar_titol(id_valor, titol):
+    tasques = carregar_tasques()
+    tasca = buscar_tasca(tasques, id_valor)
+    if tasca is None:
+        print("error: id no encontrado")
+        return
+    tasca.titol = titol
+    desar_tasques(tasques)
+
+
 def llistar_tasques():
     tasques = carregar_tasques()
     if not tasques:
@@ -88,11 +109,19 @@ def main(argv=None):
 
     subcomandes.add_parser("list", help="Mostra totes les tasques")
 
+    canviar_titol = subcomandes.add_parser(
+        "setTitle", help="Canvia el títol d'una tasca"
+    )
+    canviar_titol.add_argument("--id", required=True, help="ID de la tasca")
+    canviar_titol.add_argument("--title", required=True, help="Nou títol de la tasca")
+
     args = parser.parse_args(argv)
     if args.comanda == "add":
         afegir_tasca(args.title, args.subject, args.due)
     elif args.comanda == "list":
         llistar_tasques()
+    elif args.comanda == "setTitle":
+        modificar_titol(args.id, args.title)
 
 
 if __name__ == "__main__":

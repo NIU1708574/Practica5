@@ -185,3 +185,51 @@ def test_id_automatic_segon_maxim_existent(aplicacio):
     assert resultat.stdout.strip() == "Tasca [ID: 6] creada amb èxit"
     ids = [tasca["id"] for tasca in json.loads(fitxer.read_text(encoding="utf-8"))]
     assert ids == [5, 6]
+
+
+def test_gs_07_modificar_titol(aplicacio):
+    app, fitxer = aplicacio
+    registre = {
+        "id": 1,
+        "titol": "Pràctica 1",
+        "assignatura": "RS",
+        "estat": "pendent",
+        "data_limit": "2026-12-01",
+    }
+    fitxer.write_text(json.dumps([registre], ensure_ascii=False), encoding="utf-8")
+
+    resultat = executar(app, "setTitle", "--id", "1", "--title", "Títol revisat")
+
+    assert resultat.returncode == 0
+    desat = json.loads(fitxer.read_text(encoding="utf-8"))
+    assert desat == [{**registre, "titol": "Títol revisat"}]
+
+    resultat = executar(app, "list")
+
+    assert resultat.returncode == 0
+    assert json.loads(fitxer.read_text(encoding="utf-8")) == desat
+
+
+def test_gs_12_set_title_id_inexistent(aplicacio):
+    app, fitxer = aplicacio
+    fitxer.write_text(
+        json.dumps(
+            [
+                {
+                    "id": 1,
+                    "titol": "Pràctica 1",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    original = fitxer.read_text(encoding="utf-8")
+
+    resultat = executar(app, "setTitle", "--id", "999", "--title", "Nou títol")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip() == "error: id no encontrado"
+    assert fitxer.read_text(encoding="utf-8") == original
