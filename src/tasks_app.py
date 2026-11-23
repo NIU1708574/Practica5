@@ -207,13 +207,22 @@ def mostrar_resum(tasques):
     print(f"Urgents: {recomptes['urgents']}")
 
 
-def llistar_tasques(resum=False):
+def llistar_tasques(resum=False, assignatura=None):
     tasques = carregar_tasques()
+    if assignatura is not None:
+        tasques = [
+            tasca
+            for tasca in tasques
+            if tasca.assignatura.casefold() == assignatura.casefold()
+        ]
     if resum:
         mostrar_resum(tasques)
         return
     if not tasques:
-        print("Registre de tasques buit.")
+        if assignatura is not None:
+            print("No s'han trobat tasques amb aquests filtres.")
+        else:
+            print("Registre de tasques buit.")
         return
     avui = date.today()
     for tasca in tasques:
@@ -238,6 +247,9 @@ def main(argv=None):
     llistat = subcomandes.add_parser("list", help="Mostra totes les tasques")
     llistat.add_argument(
         "--summary", action="store_true", help="Mostra únicament els recomptes"
+    )
+    llistat.add_argument(
+        "--subject", help="Filtra les tasques per assignatura completa"
     )
 
     canviar_titol = subcomandes.add_parser(
@@ -284,7 +296,7 @@ def main(argv=None):
     if args.comanda == "add":
         afegir_tasca(args.title, args.subject, args.due)
     elif args.comanda == "list":
-        llistar_tasques(args.summary)
+        llistar_tasques(args.summary, args.subject)
     elif args.comanda == "setTitle":
         modificar_titol(args.id, args.title)
     elif args.comanda == "setSubject":

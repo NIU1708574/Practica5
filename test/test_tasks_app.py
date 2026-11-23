@@ -960,3 +960,71 @@ def test_gs_29_consultes_no_modifiquen_dades(registre_comu):
     resultat = executar(app, "list", avui="2026-11-23")
     assert resultat.returncode == 0
     assert fitxer.read_text(encoding="utf-8") == original
+
+    resultat = executar(app, "list", "--subject", "rs", avui="2026-11-23")
+    assert resultat.returncode == 0
+    assert fitxer.read_text(encoding="utf-8") == original
+
+    resultat = executar(
+        app, "list", "--summary", "--subject", "rs", avui="2026-11-23"
+    )
+    assert resultat.returncode == 0
+    assert fitxer.read_text(encoding="utf-8") == original
+
+
+def test_gs_23_filtrar_per_assignatura(registre_comu):
+    app, _ = registre_comu
+
+    resultat = executar(app, "list", "--subject", "rs", avui="2026-11-23")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip().splitlines() == [
+        "[1] Pràctica requisits (RS) - estat: pendent"
+        " - data límit: 2026-11-22 [CADUCADA]",
+        "[2] Examen parcial (RS) - estat: pendent"
+        " - data límit: 2026-11-23 [URGENT]",
+        "[5] Revisió apunts (RS) - estat: pendent - data límit: sense data",
+    ]
+
+
+def test_gs_26_resum_filtrat_per_assignatura(registre_comu):
+    app, _ = registre_comu
+
+    resultat = executar(
+        app, "list", "--summary", "--subject", "RS", avui="2026-11-23"
+    )
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip().splitlines() == [
+        "Total: 3",
+        "Pendents: 3",
+        "Completades: 0",
+        "Caducades: 1",
+        "Urgents: 1",
+    ]
+
+
+def test_gs_27_filtre_sense_coincidencies(registre_comu):
+    app, _ = registre_comu
+
+    resultat = executar(app, "list", "--subject", "BD", avui="2026-11-23")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip() == "No s'han trobat tasques amb aquests filtres."
+
+
+def test_gs_28_resum_sense_coincidencies(registre_comu):
+    app, _ = registre_comu
+
+    resultat = executar(
+        app, "list", "--summary", "--subject", "BD", avui="2026-11-23"
+    )
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip().splitlines() == [
+        "Total: 0",
+        "Pendents: 0",
+        "Completades: 0",
+        "Caducades: 0",
+        "Urgents: 0",
+    ]

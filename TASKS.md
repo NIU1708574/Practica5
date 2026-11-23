@@ -116,7 +116,7 @@ Objectiu: facilitar la consulta del registre sense modificar les dades.
   Requisits: RF-23, RF-24, RF-30 i RF-31.
   Escenaris: GS-22, GS-29 i GS-30.
 
-- [ ] Tasca 3.2: Implementar list --subject.
+- [x] Tasca 3.2: Implementar list --subject.
   Comparar l’assignatura completa ignorant majúscules i minúscules.
   Permetre combinar el filtre amb --summary.
   Afegir proves amb coincidències i sense coincidències.
