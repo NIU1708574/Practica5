@@ -1164,3 +1164,22 @@ def test_gs_25_combinacio_sense_coincidencies(registre_comu):
         "Caducades: 0",
         "Urgents: 0",
     ]
+
+
+def test_gs_26_resum_filtrat_per_titol(registre_comu):
+    app, fitxer = registre_comu
+    original = fitxer.read_bytes()
+
+    resultat = executar(
+        app, "list", "--summary", "--keyword", "PRÀCTICA", avui="2026-11-23"
+    )
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip().splitlines() == [
+        "Total: 2",
+        "Pendents: 1",
+        "Completades: 1",
+        "Caducades: 1",
+        "Urgents: 0",
+    ]
+    assert fitxer.read_bytes() == original

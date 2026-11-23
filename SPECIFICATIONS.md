@@ -12,6 +12,7 @@ Les dades es conserven entre execucions en el fitxer data/tasks.json.
 - Increment 1 — v1.0: creació i llistat de tasques.
 - Increment 2 — v2.0: dates límit, modificació d’atributs, canvis d’estat
   i avisos d’urgència i caducitat.
+- Increment 3 — v3.0: resum de tasques i filtres per assignatura i títol.
 
 # Increment 1 — v1.0
 
@@ -45,6 +46,10 @@ Cada tasca conté:
   assignatura i estat, mitjançant list.
 
 ## 6. Escenaris inicials
+
+Aquests escenaris documenten v1.0. Per executar les proves sobre v3.0,
+s’apliquen les adaptacions de la secció 14; GS-01 i GS-03 no són
+comandaments o sortides vigents sense aquestes adaptacions.
 
 ### GS-01: Creació correcta d’una tasca
 Atès que el registre de tasques és buit
@@ -161,7 +166,8 @@ una tasca. L’historial de la versió 1.0 es conserva com a documentació.
 - RF-10: El sistema tasks_app ha de proveir a l’estudiant la capacitat
   de marcar una tasca com a completada mitjançant completeTask --id <ID>.
 
-- RF-11: Si l’ID indicat no correspon a cap tasca, el sistema tasks_app
+- RF-11: Si l’ID indicat en setTitle, setSubject, setDueDate, setId,
+  completeTask o markPending no correspon a cap tasca, el sistema tasks_app
   ha de mostrar "error: id no encontrado" sense modificar les dades.
 
 - RF-12: Si una tasca pendent té una data límit anterior a avui,
@@ -285,14 +291,21 @@ I conserva els altres atributs
 I el canvi persisteix entre execucions.
 
 ### GS-12: Operacions sobre un ID inexistent
-Atès que no existeix cap tasca amb ID 999
-Quan l’estudiant executa una operació sobre --id 999
+Esquema d’escenari:
+Atès que data/tasks.json existeix i no conté cap tasca amb ID 999
+I se n’ha guardat el contingut abans de l’operació
+Quan l’estudiant executa python3 src/tasks_app.py <arguments>
 Aleshores el sistema mostra "error: id no encontrado"
-I el registre no es modifica.
+I el contingut del fitxer es manté idèntic.
 
-Aquest escenari s’ha de verificar amb setTitle, setSubject,
-setDueDate, setId, completeTask i markPending,
-utilitzant arguments nous vàlids.
+Exemples:
+| arguments |
+| setTitle --id 999 --title "Títol nou" |
+| setSubject --id 999 --subject "RS" |
+| setDueDate --id 999 --due 2026-12-03 |
+| setId --id 999 --newId 5 |
+| completeTask --id 999 |
+| markPending --id 999 |
 
 ### GS-13: Avisos segons la data límit
 Atès que la data actual és 2026-11-23
@@ -352,17 +365,20 @@ Exemples de valor:
   | 1.5   |
 
 ### GS-19: Retornar una tasca completada a pendent
+Esquema d’escenari:
 Atès que la data actual és 2026-11-23
-I existeix una tasca completada amb ID 5 i data límit 2026-11-22
-Quan l’estudiant executa:
-  python3 src/tasks_app.py markPending --id 5
+I existeix una tasca completada amb ID 5 i data_limit <data>
+Quan l’estudiant executa python3 src/tasks_app.py markPending --id 5
 Aleshores el seu estat passa a ser pendent
 I conserva els altres atributs
-I el canvi persisteix entre execucions
-I en llistar-la mostra [CADUCADA].
+Quan torna a executar l’aplicació amb list
+Aleshores la tasca continua pendent i mostra <avis>.
 
-Repetir la comprovació amb data límit 2026-11-23,
-esperant [URGENT], i sense data límit, esperant cap avís.
+Exemples:
+| data       | avis       |
+| 2026-11-22 | [CADUCADA] |
+| 2026-11-23 | [URGENT]   |
+| null       | cap avís   |
 
 ### GS-20: Crear després d’un canvi d’ID
 Atès que el registre conté una única tasca amb ID 1
@@ -371,19 +387,26 @@ Quan crea una nova tasca vàlida
 Aleshores la nova tasca rep l’ID 6
 I la tasca amb ID 5 es conserva.
 
-### GS-21: Repetir operacions sense alterar altres dades
+### GS-21.a: Canviar l’ID pel mateix identificador
 Atès que existeix una tasca amb ID 1
-Quan l’estudiant executa setId --id 1 --newId 1
+I se n’ha guardat el registre original
+Quan l’estudiant executa python3 src/tasks_app.py setId --id 1 --newId 1
 Aleshores el registre no canvia
 I no es mostra cap error.
 
-Quan executa completeTask dues vegades sobre aquesta tasca
+### GS-21.b: Completar dues vegades
+Atès que existeix una tasca pendent amb ID 1
+Quan l’estudiant executa python3 src/tasks_app.py completeTask --id 1 dues vegades
 Aleshores l’estat final és completada
-I es conserven els altres atributs.
+I es conserven els altres atributs
+I no es mostra cap error.
 
-Quan executa markPending dues vegades sobre aquesta tasca
+### GS-21.c: Retornar a pendent dues vegades
+Atès que existeix una tasca completada amb ID 1
+Quan l’estudiant executa python3 src/tasks_app.py markPending --id 1 dues vegades
 Aleshores l’estat final és pendent
-I es conserven els altres atributs.
+I es conserven els altres atributs
+I no es mostra cap error.
 
 ## 14. Adaptació de les proves del primer increment
 
@@ -448,7 +471,7 @@ Per tant:
   pendents, completades, caducades i urgents mitjançant list --summary.
 
 - RF-24: El sistema tasks_app ha de calcular els recomptes de tasques
-  urgents i caducades aplicant les regles de dates de la versió 2.0.
+  urgents i caducades aplicant RF-12, RF-13 i RF-14.
 
 - RF-25: El sistema tasks_app ha de proveir a l’estudiant la capacitat
   de filtrar les tasques per coincidència completa de l’assignatura,
@@ -471,7 +494,8 @@ Per tant:
   tasks_app ha de mostrar tots els recomptes a zero.
 
 - RF-31: El sistema tasks_app ha de conservar les dades del registre
-  sense modificacions en executar qualsevol consulta de llistat o resum.
+  existent sense modificacions en executar qualsevol consulta de llistat
+  o resum. Si el fitxer no existeix, s’aplica la inicialització de RF-02.
 
 ## Escenaris Gherkin
 
@@ -516,30 +540,46 @@ Quan l’estudiant executa:
 Aleshores el sistema mostra únicament la tasca amb ID 1.
 
 ### GS-26: Resum filtrat
-Quan l’estudiant executa:
-  python3 src/tasks_app.py list --summary --subject "RS"
-Aleshores el sistema mostra:
-  Total: 3
-  Pendents: 3
-  Completades: 0
-  Caducades: 1
-  Urgents: 1
+Esquema d’escenari:
+Atès el registre i la data de les dades comunes de GS-22 a GS-28
+Quan l’estudiant executa python3 src/tasks_app.py list --summary <filtres>
+Aleshores mostra els recomptes indicats
+I no mostra les files individuals de les tasques.
+
+Exemples:
+| filtres                              | Total | Pendents | Completades | Caducades | Urgents |
+| --subject "RS"                       | 3     | 3        | 0           | 1         | 1       |
+| --keyword "PRÀCTICA"                  | 2     | 1        | 1           | 1         | 0       |
+| --subject "rs" --keyword "pràctica"   | 1     | 1        | 0           | 1         | 0       |
 
 ### GS-27: Filtre sense coincidències
-Quan l’estudiant executa:
-  python3 src/tasks_app.py list --subject "BD"
-Aleshores el sistema mostra
-  "No s'han trobat tasques amb aquests filtres.".
+Esquema d’escenari:
+Atès el registre i la data de les dades comunes de GS-22 a GS-28
+Quan l’estudiant executa python3 src/tasks_app.py list <filtres>
+Aleshores el sistema mostra "No s'han trobat tasques amb aquests filtres.".
+
+Exemples:
+| filtres                              |
+| --subject "BD"                       |
+| --keyword "inexistent"               |
+| --subject "SO" --keyword "requisits" |
 
 ### GS-28: Resum sense coincidències
-Quan l’estudiant executa:
-  python3 src/tasks_app.py list --summary --subject "BD"
+Esquema d’escenari:
+Atès el registre i la data de les dades comunes de GS-22 a GS-28
+Quan l’estudiant executa python3 src/tasks_app.py list --summary <filtres>
 Aleshores el sistema mostra:
   Total: 0
   Pendents: 0
   Completades: 0
   Caducades: 0
   Urgents: 0
+
+Exemples:
+| filtres                              |
+| --subject "BD"                       |
+| --keyword "inexistent"               |
+| --subject "SO" --keyword "requisits" |
 
 ### GS-29: Consultes sense modificar les dades
 Atès que es coneix el contingut de data/tasks.json
@@ -551,3 +591,55 @@ Atès que el registre no conté tasques
 Quan l’estudiant executa:
   python3 src/tasks_app.py list --summary
 Aleshores el sistema mostra tots els recomptes a zero.
+
+### GS-31: Inicialització del fitxer de persistència
+Atès que data/tasks.json no existeix
+Quan l’estudiant executa python3 src/tasks_app.py list
+Aleshores el sistema crea data/tasks.json amb el contingut []
+I mostra "Registre de tasques buit.".
+
+Aquest escenari verifica RF-02, introduït a l’increment 1.
+S’identifica explícitament en la revisió final; la prova existent és
+ test_rf_02_crear_fitxer_si_no_existeix.
+
+## Traçabilitat de requisits i criteris d’acceptació
+
+La versió lliurada és v3.0. RF-03 s’aplica ampliat per RF-05;
+GS-01 i GS-03 s’executen amb les adaptacions de la secció 14.
+GS-21 agrupa els tres escenaris independents GS-21.a, GS-21.b i GS-21.c.
+Les dades comunes de GS-22 a GS-28 actuen com a context inicial compartit.
+Cada exemple d’un esquema s’executa de manera independent.
+
+| Requisit | Història o necessitat | Escenaris |
+|---|---|---|
+| RF-01 | Persistència de US-01 i US-02 | GS-01, GS-04 |
+| RF-02 | Inicialització de la persistència | GS-31 |
+| RF-03 | US-01 | GS-01 adaptat, GS-04 |
+| RF-04 | US-02 | GS-02, GS-03 adaptat |
+| RF-05 | US-03 | GS-04, GS-06 |
+| RF-06 | Validació de US-03 i US-04 | GS-05, GS-06, GS-10 |
+| RF-07 | US-04 | GS-07 |
+| RF-08 | US-04 | GS-08 |
+| RF-09 | US-04 | GS-09, GS-10 |
+| RF-10 | US-05 | GS-11, GS-21.b |
+| RF-11 | Identificació en US-04, US-05, US-07 i US-08 | GS-12 |
+| RF-12 | US-06 | GS-13, GS-19 |
+| RF-13 | US-06 | GS-13, GS-19 |
+| RF-14 | US-06 | GS-13, GS-14, GS-15, GS-19 |
+| RF-15 | Compatibilitat entre increments | GS-14 |
+| RF-16 | US-07 | GS-16, GS-21.a |
+| RF-17 | Unicitat dels identificadors | GS-17 |
+| RF-18 | Validació dels identificadors | GS-18 |
+| RF-19 | US-08 | GS-19, GS-21.c |
+| RF-20 | Persistència de les modificacions | GS-07, GS-08, GS-09, GS-11, GS-16, GS-19 |
+| RF-21 | Assignació automàtica d’identificadors | GS-04, GS-20 |
+| RF-22 | Consulta de dates | GS-13, GS-14 |
+| RF-23 | US-09 | GS-22, GS-30 |
+| RF-24 | US-09 | GS-22 |
+| RF-25 | US-10 | GS-23, GS-27 |
+| RF-26 | US-11 | GS-24, GS-27 |
+| RF-27 | Combinació de US-10 i US-11 | GS-25, GS-27 |
+| RF-28 | Resum de resultats filtrats | GS-26 |
+| RF-29 | Consulta sense coincidències | GS-27 |
+| RF-30 | Resum buit | GS-28, GS-30 |
+| RF-31 | Consultes sense efectes sobre el registre existent | GS-29 |
