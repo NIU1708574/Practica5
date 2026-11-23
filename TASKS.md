@@ -28,7 +28,7 @@ i verificant cada funcionalitat abans de continuar.
 
 ### Model i creació
 
-- [ ] Tasca 2.1: Ampliar el model i la persistència amb data_limit.
+- [x] Tasca 2.1: Ampliar el model i la persistència amb data_limit.
   Admetre tasques antigues amb l’atribut absent o null.
   No assignar dates automàticament.
   Afegir proves de lectura, escriptura i compatibilitat.

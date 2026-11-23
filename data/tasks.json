@@ -4,5 +4,11 @@
     "titol": "Pràctica 1",
     "assignatura": "RS",
     "estat": "pendent"
+  },
+  {
+    "id": 2,
+    "titol": "Pràctica 2",
+    "assignatura": "TDIW",
+    "estat": "pendent"
   }
 ]
