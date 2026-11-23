@@ -89,6 +89,16 @@ def modificar_titol(id_valor, titol):
     desar_tasques(tasques)
 
 
+def modificar_assignatura(id_valor, assignatura):
+    tasques = carregar_tasques()
+    tasca = buscar_tasca(tasques, id_valor)
+    if tasca is None:
+        print("error: id no encontrado")
+        return
+    tasca.assignatura = assignatura
+    desar_tasques(tasques)
+
+
 def llistar_tasques():
     tasques = carregar_tasques()
     if not tasques:
@@ -115,6 +125,14 @@ def main(argv=None):
     canviar_titol.add_argument("--id", required=True, help="ID de la tasca")
     canviar_titol.add_argument("--title", required=True, help="Nou títol de la tasca")
 
+    canviar_assignatura = subcomandes.add_parser(
+        "setSubject", help="Canvia l'assignatura d'una tasca"
+    )
+    canviar_assignatura.add_argument("--id", required=True, help="ID de la tasca")
+    canviar_assignatura.add_argument(
+        "--subject", required=True, help="Nova assignatura de la tasca"
+    )
+
     args = parser.parse_args(argv)
     if args.comanda == "add":
         afegir_tasca(args.title, args.subject, args.due)
@@ -122,6 +140,8 @@ def main(argv=None):
         llistar_tasques()
     elif args.comanda == "setTitle":
         modificar_titol(args.id, args.title)
+    elif args.comanda == "setSubject":
+        modificar_assignatura(args.id, args.subject)
 
 
 if __name__ == "__main__":

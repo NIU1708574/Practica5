@@ -50,7 +50,7 @@ i verificant cada funcionalitat abans de continuar.
   Requisits: RF-07, RF-11 i RF-20.
   Escenaris: GS-07 i GS-12 per a setTitle.
 
-- [ ] Tasca 2.4: Implementar setSubject i les proves corresponents.
+- [x] Tasca 2.4: Implementar setSubject i les proves corresponents.
   Verificar ID inexistent, persistència i conservació dels altres atributs.
   Requisits: RF-08, RF-11 i RF-20.
   Escenaris: GS-08 i GS-12 per a setSubject.

@@ -233,3 +233,51 @@ def test_gs_12_set_title_id_inexistent(aplicacio):
     assert resultat.returncode == 0
     assert resultat.stdout.strip() == "error: id no encontrado"
     assert fitxer.read_text(encoding="utf-8") == original
+
+
+def test_gs_08_modificar_assignatura(aplicacio):
+    app, fitxer = aplicacio
+    registre = {
+        "id": 1,
+        "titol": "Pràctica 1",
+        "assignatura": "RS",
+        "estat": "pendent",
+        "data_limit": "2026-12-01",
+    }
+    fitxer.write_text(json.dumps([registre], ensure_ascii=False), encoding="utf-8")
+
+    resultat = executar(app, "setSubject", "--id", "1", "--subject", "SO")
+
+    assert resultat.returncode == 0
+    desat = json.loads(fitxer.read_text(encoding="utf-8"))
+    assert desat == [{**registre, "assignatura": "SO"}]
+
+    resultat = executar(app, "list")
+
+    assert resultat.returncode == 0
+    assert json.loads(fitxer.read_text(encoding="utf-8")) == desat
+
+
+def test_gs_12_set_subject_id_inexistent(aplicacio):
+    app, fitxer = aplicacio
+    fitxer.write_text(
+        json.dumps(
+            [
+                {
+                    "id": 1,
+                    "titol": "Pràctica 1",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    original = fitxer.read_text(encoding="utf-8")
+
+    resultat = executar(app, "setSubject", "--id", "999", "--subject", "SO")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip() == "error: id no encontrado"
+    assert fitxer.read_text(encoding="utf-8") == original
