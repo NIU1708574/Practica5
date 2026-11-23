@@ -1,5 +1,7 @@
 import argparse
 import json
+import re
+from datetime import date
 from pathlib import Path
 
 try:
@@ -40,10 +42,27 @@ def carregar_tasques():
     return [Task.from_dict(registre) for registre in dades]
 
 
-def afegir_tasca(titol, assignatura):
+FORMAT_DATA = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+
+def es_data_valida(valor):
+    if not valor or not FORMAT_DATA.fullmatch(valor):
+        return False
+    try:
+        date.fromisoformat(valor)
+    except ValueError:
+        return False
+    return True
+
+
+def afegir_tasca(titol, assignatura, data_limit):
+    if not es_data_valida(data_limit):
+        print("error: fecha invalida")
+        return
+
     tasques = carregar_tasques()
     nou_id = max((tasca.id for tasca in tasques), default=0) + 1
-    tasca = Task(nou_id, titol, assignatura)
+    tasca = Task(nou_id, titol, assignatura, "pendent", data_limit)
     tasques.append(tasca)
     desar_tasques(tasques)
     print(f"Tasca [ID: {tasca.id}] creada amb èxit")
@@ -65,12 +84,13 @@ def main(argv=None):
     afegir = subcomandes.add_parser("add", help="Afegeix una nova tasca")
     afegir.add_argument("--title", required=True, help="Títol de la tasca")
     afegir.add_argument("--subject", required=True, help="Assignatura de la tasca")
+    afegir.add_argument("--due", help="Data límit en format YYYY-MM-DD")
 
     subcomandes.add_parser("list", help="Mostra totes les tasques")
 
     args = parser.parse_args(argv)
     if args.comanda == "add":
-        afegir_tasca(args.title, args.subject)
+        afegir_tasca(args.title, args.subject, args.due)
     elif args.comanda == "list":
         llistar_tasques()
 

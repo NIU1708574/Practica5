@@ -35,7 +35,7 @@ i verificant cada funcionalitat abans de continuar.
   Requisits: RF-01, RF-15 i RF-20.
   Escenaris: GS-14.
 
-- [ ] Tasca 2.2: Ampliar add amb --due obligatori i validar dates.
+- [x] Tasca 2.2: Ampliar add amb --due obligatori i validar dates.
   Mostrar el missatge especificat quan la data falta o és invàlida.
   Garantir IDs automàtics segons el màxim existent.
   Adaptar la prova de creació del primer increment.
