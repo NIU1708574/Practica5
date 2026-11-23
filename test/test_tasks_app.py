@@ -54,6 +54,55 @@ def executar(app, *args, avui=None):
     )
 
 
+@pytest.fixture
+def registre_comu(aplicacio):
+    app, fitxer = aplicacio
+    fitxer.write_text(
+        json.dumps(
+            [
+                {
+                    "id": 1,
+                    "titol": "Pràctica requisits",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                    "data_limit": "2026-11-22",
+                },
+                {
+                    "id": 2,
+                    "titol": "Examen parcial",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                    "data_limit": "2026-11-23",
+                },
+                {
+                    "id": 3,
+                    "titol": "Pràctica processos",
+                    "assignatura": "SO",
+                    "estat": "completada",
+                    "data_limit": "2026-11-20",
+                },
+                {
+                    "id": 4,
+                    "titol": "Lectura tema 4",
+                    "assignatura": "SO",
+                    "estat": "pendent",
+                    "data_limit": "2026-12-10",
+                },
+                {
+                    "id": 5,
+                    "titol": "Revisió apunts",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                    "data_limit": None,
+                },
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    return app, fitxer
+
+
 def test_gs_01_creacio_correcta(aplicacio):
     app, fitxer = aplicacio
 
@@ -867,3 +916,47 @@ def test_gs_19_avisos_despres_mark_pending(aplicacio, data_limit, avis):
         f"[5] Pràctica 1 (RS) - estat: pendent"
         f" - data límit: {data_mostrada}{sufix}"
     )
+
+
+def test_gs_22_resum_general(registre_comu):
+    app, _ = registre_comu
+
+    resultat = executar(app, "list", "--summary", avui="2026-11-23")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip().splitlines() == [
+        "Total: 5",
+        "Pendents: 4",
+        "Completades: 1",
+        "Caducades: 1",
+        "Urgents: 1",
+    ]
+    assert "Pràctica requisits" not in resultat.stdout
+
+
+def test_gs_30_resum_registre_buit(aplicacio):
+    app, _ = aplicacio
+
+    resultat = executar(app, "list", "--summary", avui="2026-11-23")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip().splitlines() == [
+        "Total: 0",
+        "Pendents: 0",
+        "Completades: 0",
+        "Caducades: 0",
+        "Urgents: 0",
+    ]
+
+
+def test_gs_29_consultes_no_modifiquen_dades(registre_comu):
+    app, fitxer = registre_comu
+    original = fitxer.read_text(encoding="utf-8")
+
+    resultat = executar(app, "list", "--summary", avui="2026-11-23")
+    assert resultat.returncode == 0
+    assert fitxer.read_text(encoding="utf-8") == original
+
+    resultat = executar(app, "list", avui="2026-11-23")
+    assert resultat.returncode == 0
+    assert fitxer.read_text(encoding="utf-8") == original

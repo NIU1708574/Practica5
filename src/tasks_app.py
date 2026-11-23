@@ -176,8 +176,42 @@ def avis_tasca(tasca, avui):
     return ""
 
 
-def llistar_tasques():
+def recomptar_tasques(tasques):
+    avui = date.today()
+    recomptes = {
+        "total": len(tasques),
+        "pendents": 0,
+        "completades": 0,
+        "caducades": 0,
+        "urgents": 0,
+    }
+    for tasca in tasques:
+        if tasca.estat == "pendent":
+            recomptes["pendents"] += 1
+        elif tasca.estat == "completada":
+            recomptes["completades"] += 1
+        avis = avis_tasca(tasca, avui)
+        if avis == "[CADUCADA]":
+            recomptes["caducades"] += 1
+        elif avis == "[URGENT]":
+            recomptes["urgents"] += 1
+    return recomptes
+
+
+def mostrar_resum(tasques):
+    recomptes = recomptar_tasques(tasques)
+    print(f"Total: {recomptes['total']}")
+    print(f"Pendents: {recomptes['pendents']}")
+    print(f"Completades: {recomptes['completades']}")
+    print(f"Caducades: {recomptes['caducades']}")
+    print(f"Urgents: {recomptes['urgents']}")
+
+
+def llistar_tasques(resum=False):
     tasques = carregar_tasques()
+    if resum:
+        mostrar_resum(tasques)
+        return
     if not tasques:
         print("Registre de tasques buit.")
         return
@@ -201,7 +235,10 @@ def main(argv=None):
     afegir.add_argument("--subject", required=True, help="Assignatura de la tasca")
     afegir.add_argument("--due", help="Data límit en format YYYY-MM-DD")
 
-    subcomandes.add_parser("list", help="Mostra totes les tasques")
+    llistat = subcomandes.add_parser("list", help="Mostra totes les tasques")
+    llistat.add_argument(
+        "--summary", action="store_true", help="Mostra únicament els recomptes"
+    )
 
     canviar_titol = subcomandes.add_parser(
         "setTitle", help="Canvia el títol d'una tasca"
@@ -247,7 +284,7 @@ def main(argv=None):
     if args.comanda == "add":
         afegir_tasca(args.title, args.subject, args.due)
     elif args.comanda == "list":
-        llistar_tasques()
+        llistar_tasques(args.summary)
     elif args.comanda == "setTitle":
         modificar_titol(args.id, args.title)
     elif args.comanda == "setSubject":

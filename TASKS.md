@@ -109,7 +109,7 @@ i verificant cada funcionalitat abans de continuar.
 
 Objectiu: facilitar la consulta del registre sense modificar les dades.
 
-- [ ] Tasca 3.1: Implementar list --summary amb els cinc recomptes.
+- [x] Tasca 3.1: Implementar list --summary amb els cinc recomptes.
   Reutilitzar les regles d’urgència i caducitat del segon increment.
   Afegir proves amb una data de referència controlada.
   Verificar el resum d’un registre buit.
