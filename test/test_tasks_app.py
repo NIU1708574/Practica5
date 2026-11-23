@@ -281,3 +281,121 @@ def test_gs_12_set_subject_id_inexistent(aplicacio):
     assert resultat.returncode == 0
     assert resultat.stdout.strip() == "error: id no encontrado"
     assert fitxer.read_text(encoding="utf-8") == original
+
+
+def test_gs_09_assignar_data_a_tasca_antiga(aplicacio):
+    app, fitxer = aplicacio
+    registre = {
+        "id": 1,
+        "titol": "Tasca antiga",
+        "assignatura": "RS",
+        "estat": "pendent",
+    }
+    fitxer.write_text(json.dumps([registre], ensure_ascii=False), encoding="utf-8")
+
+    resultat = executar(app, "setDueDate", "--id", "1", "--due", "2026-12-03")
+
+    assert resultat.returncode == 0
+    desat = json.loads(fitxer.read_text(encoding="utf-8"))
+    assert desat == [{**registre, "data_limit": "2026-12-03"}]
+
+    resultat = executar(app, "list")
+
+    assert resultat.returncode == 0
+    assert json.loads(fitxer.read_text(encoding="utf-8")) == desat
+
+
+def test_gs_09_modificar_data_existent(aplicacio):
+    app, fitxer = aplicacio
+    registre = {
+        "id": 1,
+        "titol": "Pràctica 1",
+        "assignatura": "RS",
+        "estat": "pendent",
+        "data_limit": "2026-12-01",
+    }
+    fitxer.write_text(json.dumps([registre], ensure_ascii=False), encoding="utf-8")
+
+    resultat = executar(app, "setDueDate", "--id", "1", "--due", "2026-12-03")
+
+    assert resultat.returncode == 0
+    assert json.loads(fitxer.read_text(encoding="utf-8")) == [
+        {**registre, "data_limit": "2026-12-03"}
+    ]
+
+
+@pytest.mark.parametrize("data", ["2026-02-30", "01/12/2026", "text"])
+def test_gs_10_data_invalida_no_modifica(aplicacio, data):
+    app, fitxer = aplicacio
+    fitxer.write_text(
+        json.dumps(
+            [
+                {
+                    "id": 1,
+                    "titol": "Pràctica 1",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                    "data_limit": "2026-12-01",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    original = fitxer.read_text(encoding="utf-8")
+
+    resultat = executar(app, "setDueDate", "--id", "1", "--due", data)
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip() == "error: fecha invalida"
+    assert fitxer.read_text(encoding="utf-8") == original
+
+
+def test_gs_10_sense_data_no_modifica(aplicacio):
+    app, fitxer = aplicacio
+    fitxer.write_text(
+        json.dumps(
+            [
+                {
+                    "id": 1,
+                    "titol": "Pràctica 1",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    original = fitxer.read_text(encoding="utf-8")
+
+    resultat = executar(app, "setDueDate", "--id", "1")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip() == "error: fecha invalida"
+    assert fitxer.read_text(encoding="utf-8") == original
+
+
+def test_gs_12_set_due_date_id_inexistent(aplicacio):
+    app, fitxer = aplicacio
+    fitxer.write_text(
+        json.dumps(
+            [
+                {
+                    "id": 1,
+                    "titol": "Pràctica 1",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    original = fitxer.read_text(encoding="utf-8")
+
+    resultat = executar(app, "setDueDate", "--id", "999", "--due", "2026-12-03")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip() == "error: id no encontrado"
+    assert fitxer.read_text(encoding="utf-8") == original

@@ -99,6 +99,19 @@ def modificar_assignatura(id_valor, assignatura):
     desar_tasques(tasques)
 
 
+def modificar_data_limit(id_valor, data_limit):
+    tasques = carregar_tasques()
+    tasca = buscar_tasca(tasques, id_valor)
+    if tasca is None:
+        print("error: id no encontrado")
+        return
+    if not es_data_valida(data_limit):
+        print("error: fecha invalida")
+        return
+    tasca.data_limit = data_limit
+    desar_tasques(tasques)
+
+
 def llistar_tasques():
     tasques = carregar_tasques()
     if not tasques:
@@ -133,6 +146,12 @@ def main(argv=None):
         "--subject", required=True, help="Nova assignatura de la tasca"
     )
 
+    canviar_data = subcomandes.add_parser(
+        "setDueDate", help="Assigna o canvia la data límit d'una tasca"
+    )
+    canviar_data.add_argument("--id", required=True, help="ID de la tasca")
+    canviar_data.add_argument("--due", help="Nova data límit en format YYYY-MM-DD")
+
     args = parser.parse_args(argv)
     if args.comanda == "add":
         afegir_tasca(args.title, args.subject, args.due)
@@ -142,6 +161,8 @@ def main(argv=None):
         modificar_titol(args.id, args.title)
     elif args.comanda == "setSubject":
         modificar_assignatura(args.id, args.subject)
+    elif args.comanda == "setDueDate":
+        modificar_data_limit(args.id, args.due)
 
 
 if __name__ == "__main__":

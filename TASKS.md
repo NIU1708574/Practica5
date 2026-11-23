@@ -55,7 +55,7 @@ i verificant cada funcionalitat abans de continuar.
   Requisits: RF-08, RF-11 i RF-20.
   Escenaris: GS-08 i GS-12 per a setSubject.
 
-- [ ] Tasca 2.5: Implementar setDueDate i les proves corresponents.
+- [x] Tasca 2.5: Implementar setDueDate i les proves corresponents.
   Permetre assignar dates a tasques antigues.
   Verificar dates invàlides, ID inexistent i persistència.
   Requisits: RF-06, RF-09, RF-11 i RF-20.
