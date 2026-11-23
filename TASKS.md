@@ -12,7 +12,7 @@ Objectiu: Tenir una versió CLI funcional per afegir i consultar tasques en JSON
 
 ### Tasques d'Execució:
 
-- [x] Tasca 1.1: Crear estructura de directoris (`src/`, `test/`, `data/`) i fitxer `data/tasks.json` inicial. (Requisits RF-01 i RF-02) 
+- [x] Tasca 1.1: Crear estructura de directoris (`src/`, `test/`, `data/`) i fitxer `data/tasks.json` inicial. (Requisits RF-01 i RF-02)
   Requisits: RF-01 i RF-02. Escenari: GS-31. Dependències: cap.
 
 - [x] Tasca 1.2: Implementar model de dades `Task` a `src/models.py` amb mètodes de serialització JSON.
