@@ -131,7 +131,7 @@ Objectiu: facilitar la consulta del registre sense modificar les dades.
   Escenaris: GS-24, GS-25 i GS-29.
   Ampliar GS-26 i GS-28 amb el filtre de títol.
 
-- [ ] Tasca 3.4: Validar el tercer increment complet.
+- [x] Tasca 3.4: Validar el tercer increment complet.
   Executar python3 -m pytest test.
   Comprovar manualment els nous comandaments.
   Verificar que list sense opcions conserva el comportament anterior.

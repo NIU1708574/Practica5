@@ -54,6 +54,19 @@ def executar(app, *args, avui=None):
     )
 
 
+def test_rf_02_crear_fitxer_si_no_existeix(aplicacio):
+    app, fitxer = aplicacio
+    fitxer.unlink()
+    assert not fitxer.exists()
+
+    resultat = executar(app, "list", avui="2026-11-23")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip() == "Registre de tasques buit."
+    assert fitxer.exists()
+    assert json.loads(fitxer.read_text(encoding="utf-8")) == []
+
+
 @pytest.fixture
 def registre_comu(aplicacio):
     app, fitxer = aplicacio
