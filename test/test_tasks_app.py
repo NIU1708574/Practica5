@@ -399,3 +399,304 @@ def test_gs_12_set_due_date_id_inexistent(aplicacio):
     assert resultat.returncode == 0
     assert resultat.stdout.strip() == "error: id no encontrado"
     assert fitxer.read_text(encoding="utf-8") == original
+
+
+def test_gs_16_canviar_id(aplicacio):
+    app, fitxer = aplicacio
+    registre = {
+        "id": 1,
+        "titol": "Pràctica 1",
+        "assignatura": "RS",
+        "estat": "pendent",
+        "data_limit": "2026-12-01",
+    }
+    fitxer.write_text(json.dumps([registre], ensure_ascii=False), encoding="utf-8")
+
+    resultat = executar(app, "setId", "--id", "1", "--newId", "5")
+
+    assert resultat.returncode == 0
+    desat = json.loads(fitxer.read_text(encoding="utf-8"))
+    assert desat == [{**registre, "id": 5}]
+
+    resultat = executar(app, "list")
+
+    assert resultat.returncode == 0
+    assert json.loads(fitxer.read_text(encoding="utf-8")) == desat
+
+
+def test_gs_12_set_id_inexistent(aplicacio):
+    app, fitxer = aplicacio
+    fitxer.write_text(
+        json.dumps(
+            [
+                {
+                    "id": 1,
+                    "titol": "Pràctica 1",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    original = fitxer.read_text(encoding="utf-8")
+
+    resultat = executar(app, "setId", "--id", "999", "--newId", "5")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip() == "error: id no encontrado"
+    assert fitxer.read_text(encoding="utf-8") == original
+
+
+def test_gs_17_rebutjar_id_duplicat(aplicacio):
+    app, fitxer = aplicacio
+    fitxer.write_text(
+        json.dumps(
+            [
+                {
+                    "id": 1,
+                    "titol": "Pràctica 1",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                },
+                {
+                    "id": 5,
+                    "titol": "Pràctica 2",
+                    "assignatura": "SO",
+                    "estat": "pendent",
+                },
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    original = fitxer.read_text(encoding="utf-8")
+
+    resultat = executar(app, "setId", "--id", "1", "--newId", "5")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip() == "error: id ya existente"
+    assert fitxer.read_text(encoding="utf-8") == original
+
+
+@pytest.mark.parametrize("nou_id", ["0", "-2", "abc", "1.5"])
+def test_gs_18_rebutjar_id_invalid(aplicacio, nou_id):
+    app, fitxer = aplicacio
+    fitxer.write_text(
+        json.dumps(
+            [
+                {
+                    "id": 1,
+                    "titol": "Pràctica 1",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    original = fitxer.read_text(encoding="utf-8")
+
+    resultat = executar(app, "setId", "--id", "1", "--newId", nou_id)
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip() == "error: id invalido"
+    assert fitxer.read_text(encoding="utf-8") == original
+
+
+def test_gs_20_crear_despres_canvi_id(aplicacio):
+    app, fitxer = aplicacio
+    fitxer.write_text(
+        json.dumps(
+            [
+                {
+                    "id": 1,
+                    "titol": "Pràctica 1",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    resultat = executar(app, "setId", "--id", "1", "--newId", "5")
+    assert resultat.returncode == 0
+
+    resultat = executar(
+        app, "add", "--title", "Pràctica 2", "--subject", "SO", "--due", "2026-12-01"
+    )
+
+    assert resultat.stdout.strip() == "Tasca [ID: 6] creada amb èxit"
+    ids = [tasca["id"] for tasca in json.loads(fitxer.read_text(encoding="utf-8"))]
+    assert ids == [5, 6]
+
+
+def test_gs_21_set_id_igual_no_canvia_res(aplicacio):
+    app, fitxer = aplicacio
+    fitxer.write_text(
+        json.dumps(
+            [
+                {
+                    "id": 1,
+                    "titol": "Pràctica 1",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    original = fitxer.read_text(encoding="utf-8")
+
+    resultat = executar(app, "setId", "--id", "1", "--newId", "1")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip() == ""
+    assert fitxer.read_text(encoding="utf-8") == original
+
+
+def test_gs_11_completar_tasca(aplicacio):
+    app, fitxer = aplicacio
+    registre = {
+        "id": 1,
+        "titol": "Pràctica 1",
+        "assignatura": "RS",
+        "estat": "pendent",
+        "data_limit": "2026-12-01",
+    }
+    fitxer.write_text(json.dumps([registre], ensure_ascii=False), encoding="utf-8")
+
+    resultat = executar(app, "completeTask", "--id", "1")
+
+    assert resultat.returncode == 0
+    desat = json.loads(fitxer.read_text(encoding="utf-8"))
+    assert desat == [{**registre, "estat": "completada"}]
+
+    resultat = executar(app, "list")
+
+    assert resultat.returncode == 0
+    assert json.loads(fitxer.read_text(encoding="utf-8")) == desat
+
+
+def test_gs_12_complete_task_id_inexistent(aplicacio):
+    app, fitxer = aplicacio
+    fitxer.write_text(
+        json.dumps(
+            [
+                {
+                    "id": 1,
+                    "titol": "Pràctica 1",
+                    "assignatura": "RS",
+                    "estat": "pendent",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    original = fitxer.read_text(encoding="utf-8")
+
+    resultat = executar(app, "completeTask", "--id", "999")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip() == "error: id no encontrado"
+    assert fitxer.read_text(encoding="utf-8") == original
+
+
+def test_gs_21_completar_dues_vegades(aplicacio):
+    app, fitxer = aplicacio
+    registre = {
+        "id": 1,
+        "titol": "Pràctica 1",
+        "assignatura": "RS",
+        "estat": "pendent",
+        "data_limit": "2026-12-01",
+    }
+    fitxer.write_text(json.dumps([registre], ensure_ascii=False), encoding="utf-8")
+
+    primer = executar(app, "completeTask", "--id", "1")
+    desat = fitxer.read_text(encoding="utf-8")
+    segon = executar(app, "completeTask", "--id", "1")
+
+    assert primer.returncode == 0
+    assert primer.stdout.strip() == ""
+    assert segon.returncode == 0
+    assert segon.stdout.strip() == ""
+    assert fitxer.read_text(encoding="utf-8") == desat
+    assert json.loads(desat) == [{**registre, "estat": "completada"}]
+
+
+def test_gs_19_retornar_a_pendent(aplicacio):
+    app, fitxer = aplicacio
+    registre = {
+        "id": 5,
+        "titol": "Pràctica 1",
+        "assignatura": "RS",
+        "estat": "completada",
+        "data_limit": "2026-11-22",
+    }
+    fitxer.write_text(json.dumps([registre], ensure_ascii=False), encoding="utf-8")
+
+    resultat = executar(app, "markPending", "--id", "5")
+
+    assert resultat.returncode == 0
+    desat = json.loads(fitxer.read_text(encoding="utf-8"))
+    assert desat == [{**registre, "estat": "pendent"}]
+
+    resultat = executar(app, "list")
+
+    assert resultat.returncode == 0
+    assert json.loads(fitxer.read_text(encoding="utf-8")) == desat
+
+
+def test_gs_12_mark_pending_id_inexistent(aplicacio):
+    app, fitxer = aplicacio
+    fitxer.write_text(
+        json.dumps(
+            [
+                {
+                    "id": 1,
+                    "titol": "Pràctica 1",
+                    "assignatura": "RS",
+                    "estat": "completada",
+                }
+            ],
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    original = fitxer.read_text(encoding="utf-8")
+
+    resultat = executar(app, "markPending", "--id", "999")
+
+    assert resultat.returncode == 0
+    assert resultat.stdout.strip() == "error: id no encontrado"
+    assert fitxer.read_text(encoding="utf-8") == original
+
+
+def test_gs_21_mark_pending_dues_vegades(aplicacio):
+    app, fitxer = aplicacio
+    registre = {
+        "id": 1,
+        "titol": "Pràctica 1",
+        "assignatura": "RS",
+        "estat": "pendent",
+        "data_limit": "2026-12-01",
+    }
+    fitxer.write_text(json.dumps([registre], ensure_ascii=False), encoding="utf-8")
+    original = fitxer.read_text(encoding="utf-8")
+
+    primer = executar(app, "markPending", "--id", "1")
+    segon = executar(app, "markPending", "--id", "1")
+
+    assert primer.returncode == 0
+    assert primer.stdout.strip() == ""
+    assert segon.returncode == 0
+    assert segon.stdout.strip() == ""
+    assert fitxer.read_text(encoding="utf-8") == original
+    assert json.loads(original) == [registre]

@@ -112,6 +112,55 @@ def modificar_data_limit(id_valor, data_limit):
     desar_tasques(tasques)
 
 
+def canviar_identificador(id_valor, nou_id_valor):
+    tasques = carregar_tasques()
+    tasca = buscar_tasca(tasques, id_valor)
+    if tasca is None:
+        print("error: id no encontrado")
+        return
+
+    try:
+        nou_id = int(nou_id_valor)
+    except (TypeError, ValueError):
+        print("error: id invalido")
+        return
+    if nou_id <= 0:
+        print("error: id invalido")
+        return
+    if any(altre.id == nou_id for altre in tasques if altre is not tasca):
+        print("error: id ya existente")
+        return
+    if tasca.id == nou_id:
+        return
+
+    tasca.id = nou_id
+    desar_tasques(tasques)
+
+
+def completar_tasca(id_valor):
+    tasques = carregar_tasques()
+    tasca = buscar_tasca(tasques, id_valor)
+    if tasca is None:
+        print("error: id no encontrado")
+        return
+    if tasca.estat == "completada":
+        return
+    tasca.estat = "completada"
+    desar_tasques(tasques)
+
+
+def retornar_a_pendent(id_valor):
+    tasques = carregar_tasques()
+    tasca = buscar_tasca(tasques, id_valor)
+    if tasca is None:
+        print("error: id no encontrado")
+        return
+    if tasca.estat == "pendent":
+        return
+    tasca.estat = "pendent"
+    desar_tasques(tasques)
+
+
 def llistar_tasques():
     tasques = carregar_tasques()
     if not tasques:
@@ -152,6 +201,26 @@ def main(argv=None):
     canviar_data.add_argument("--id", required=True, help="ID de la tasca")
     canviar_data.add_argument("--due", help="Nova data límit en format YYYY-MM-DD")
 
+    canviar_identificador_parser = subcomandes.add_parser(
+        "setId", help="Canvia l'identificador d'una tasca"
+    )
+    canviar_identificador_parser.add_argument(
+        "--id", required=True, help="ID actual de la tasca"
+    )
+    canviar_identificador_parser.add_argument(
+        "--newId", required=True, help="Nou ID de la tasca"
+    )
+
+    completar = subcomandes.add_parser(
+        "completeTask", help="Marca una tasca com a completada"
+    )
+    completar.add_argument("--id", required=True, help="ID de la tasca")
+
+    marcar_pendent = subcomandes.add_parser(
+        "markPending", help="Retorna una tasca a l'estat pendent"
+    )
+    marcar_pendent.add_argument("--id", required=True, help="ID de la tasca")
+
     args = parser.parse_args(argv)
     if args.comanda == "add":
         afegir_tasca(args.title, args.subject, args.due)
@@ -163,6 +232,12 @@ def main(argv=None):
         modificar_assignatura(args.id, args.subject)
     elif args.comanda == "setDueDate":
         modificar_data_limit(args.id, args.due)
+    elif args.comanda == "setId":
+        canviar_identificador(args.id, args.newId)
+    elif args.comanda == "completeTask":
+        completar_tasca(args.id)
+    elif args.comanda == "markPending":
+        retornar_a_pendent(args.id)
 
 
 if __name__ == "__main__":

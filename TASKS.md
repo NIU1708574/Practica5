@@ -61,7 +61,7 @@ i verificant cada funcionalitat abans de continuar.
   Requisits: RF-06, RF-09, RF-11 i RF-20.
   Escenaris: GS-09, GS-10 i GS-12 per a setDueDate.
 
-- [ ] Tasca 2.6: Implementar setId i les proves corresponents.
+- [x] Tasca 2.6: Implementar setId i les proves corresponents.
   Verificar ID inexistent, duplicat, invàlid i igual a l’actual.
   Comprovar la creació de tasques després de canviar un ID.
   Requisits: RF-11, RF-16, RF-17, RF-18, RF-20 i RF-21.
@@ -70,13 +70,13 @@ i verificant cada funcionalitat abans de continuar.
 
 ### Canvis d’estat
 
-- [ ] Tasca 2.7: Implementar completeTask i les proves corresponents.
+- [x] Tasca 2.7: Implementar completeTask i les proves corresponents.
   Verificar ID inexistent, persistència i repetició del comandament.
   Requisits: RF-10, RF-11 i RF-20.
   Escenaris: GS-11, GS-12 per a completeTask
   i la part de completeTask de GS-21.
 
-- [ ] Tasca 2.8: Implementar markPending i les proves de canvi d’estat.
+- [x] Tasca 2.8: Implementar markPending i les proves de canvi d’estat.
   Verificar ID inexistent, persistència i repetició del comandament.
   La comprovació dels avisos de GS-19 es farà a la tasca 2.9.
   Requisits: RF-11, RF-19 i RF-20.
