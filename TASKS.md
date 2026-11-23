@@ -123,7 +123,7 @@ Objectiu: facilitar la consulta del registre sense modificar les dades.
   Requisits: RF-25, RF-28, RF-29, RF-30 i RF-31.
   Escenaris: GS-23, GS-26, GS-27, GS-28 i GS-29.
 
-- [ ] Tasca 3.3: Implementar list --keyword i la combinació de filtres.
+- [x] Tasca 3.3: Implementar list --keyword i la combinació de filtres.
   Cercar el text dins del títol ignorant majúscules i minúscules.
   Aplicar tots els filtres abans de calcular el resum.
   Afegir proves de cerca, combinació i resum amb els dos filtres.

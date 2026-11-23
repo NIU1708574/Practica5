@@ -207,7 +207,7 @@ def mostrar_resum(tasques):
     print(f"Urgents: {recomptes['urgents']}")
 
 
-def llistar_tasques(resum=False, assignatura=None):
+def llistar_tasques(resum=False, assignatura=None, paraula_clau=None):
     tasques = carregar_tasques()
     if assignatura is not None:
         tasques = [
@@ -215,11 +215,14 @@ def llistar_tasques(resum=False, assignatura=None):
             for tasca in tasques
             if tasca.assignatura.casefold() == assignatura.casefold()
         ]
+    if paraula_clau is not None:
+        clau = paraula_clau.casefold()
+        tasques = [tasca for tasca in tasques if clau in tasca.titol.casefold()]
     if resum:
         mostrar_resum(tasques)
         return
     if not tasques:
-        if assignatura is not None:
+        if assignatura is not None or paraula_clau is not None:
             print("No s'han trobat tasques amb aquests filtres.")
         else:
             print("Registre de tasques buit.")
@@ -250,6 +253,9 @@ def main(argv=None):
     )
     llistat.add_argument(
         "--subject", help="Filtra les tasques per assignatura completa"
+    )
+    llistat.add_argument(
+        "--keyword", help="Filtra les tasques pel text del títol"
     )
 
     canviar_titol = subcomandes.add_parser(
@@ -296,7 +302,7 @@ def main(argv=None):
     if args.comanda == "add":
         afegir_tasca(args.title, args.subject, args.due)
     elif args.comanda == "list":
-        llistar_tasques(args.summary, args.subject)
+        llistar_tasques(args.summary, args.subject, args.keyword)
     elif args.comanda == "setTitle":
         modificar_titol(args.id, args.title)
     elif args.comanda == "setSubject":
